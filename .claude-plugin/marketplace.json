@@ -1,11 +1,14 @@
 {
   "name": "wikictl-claude-plugin",
-  "owner": { "name": "roamer7038" },
+  "owner": {
+    "name": "roamer7038"
+  },
   "plugins": [
     {
       "name": "wikictl",
       "source": "./",
       "description": "wikictl CLI で wiki を参照・記録するスキル"
     }
-  ]
+  ],
+  "description": "wikictl で wiki を参照・記録する Claude Code プラグイン"
 }
