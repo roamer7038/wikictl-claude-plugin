@@ -1,0 +1,8 @@
+{
+  "name": "wikictl",
+  "displayName": "wikictl",
+  "description": "Git ホスト上の Markdown wiki を wikictl CLI で参照・記録するためのスキル",
+  "version": "0.1.0",
+  "author": { "name": "roamer7038" },
+  "repository": "https://github.com/roamer7038/wikictl-claude-plugin"
+}
