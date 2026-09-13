@@ -4,9 +4,13 @@
 set -u
 log_dir="${XDG_DATA_HOME:-$HOME/.local/share}/wikictl"
 mkdir -p "$log_dir"
+# The subcommand is the first argument that is neither a flag nor the value of --config / --dirs.
 sub=""
+skip=0
 for a in "$@"; do
+  if [ "$skip" = 1 ]; then skip=0; continue; fi
   case "$a" in
+    --config|-config|--dirs|-dirs) skip=1 ;;
     -*) ;;
     *) sub="$a"; break ;;
   esac

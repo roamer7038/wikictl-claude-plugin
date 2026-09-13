@@ -2,13 +2,13 @@
 
 Claude Code から [wikictl](https://github.com/roamer7038/wikictl) で wiki を参照・記録するためのプラグイン。中身はスキル `wikictl` と、利用状況を記録する薄いスクリプト。
 
-前提: `wikictl` が PATH 上にあり、`~/.config/wikictl/config.yaml` が設定済みであること。
+前提: `wikictl` が PATH 上にあり（`go install github.com/roamer7038/wikictl/cmd/wikictl@latest`）、`~/.config/wikictl/config.yaml` が設定済みであること。
 
 ## 導入
 
 開発中（ローカル）:
 
-    claude --plugin-dir ~/wikictl-claude-plugin
+    claude --plugin-dir /path/to/wikictl-claude-plugin
 
 マーケットプレイスとして登録して導入（Claude Code 内で）:
 

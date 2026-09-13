@@ -37,12 +37,12 @@ $W context                        # 既定 dirs と設定の確認
 2. あれば `get --json` で `sha` と内容を取り、一時ファイルに書き出して編集し、`put --base <sha>` で全文を置換する。無ければ `put`（`--base` 無し）で新規作成。
 
 ```bash
-printf -- '---\nsummary: <問いへの答えを 1 文、100 字程度>\ntype: <concept|procedure|decision|policy|observation|event|index>\n---\n# <問い、または名詞句>\n\n<本文>\n\n## Links\n- part_of: [<題>](<相対パス>.md)\n- cites: <URL> | <何の根拠か>\n' | $W put --json <dir>/<slug>.md
+printf -- '---\nsummary: <問いへの答えを 1 文、100 字程度>\ntype: <concept|procedure|decision|policy|observation|event|index|source>\n---\n# <問い、または名詞句>\n\n<本文>\n\n## Links\n- part_of: [<題>](<相対パス>.md)\n- cites: <URL> | <何の根拠か>\n' | $W put --json <dir>/<slug>.md
 $W put --json --base <sha> <path> < edited.md
 ```
 
 - 終了コード 3 は衝突。出力の `content` と `sha` を読み直し、同じ変更を再適用して `--base <新しい sha>` で再度 `put`。
-- 終了コード 4 は形式違反（summary 欠落、slug 違反）。直して再実行。
+- 終了コード 4 は形式違反（summary 欠落、フロントマターの YAML 不正、slug 違反）。直して再実行。
 - 置き場: 環境に依らない知識は `global/`、プロジェクト固有は `projects/<name>/`、マシン固有は `machines/<name>/`。迷えば狭い方。
 - slug は小文字英数字とハイフン。リンクは当該ファイルからの相対パスで `.md` を含める。関係は末尾の `## Links` 節に `- <type>: [題](path) | 注記`。
 - 未確定の結論は `summary: "仮: …"`。秘密は書かず参照名を書く。原典は URL（コミット固定の permalink）で引用する。
