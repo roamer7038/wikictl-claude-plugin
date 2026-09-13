@@ -1,57 +1,58 @@
 ---
 name: wikictl
-description: 環境固有の値（パス・版数・設定）、過去の判断や規則、コマンドの失敗と回避策を扱うとき、および再利用できる事実を得たときに使う。Git ホスト上の Markdown wiki を wikictl CLI で検索・取得・記録する。
+description: Use when an answer depends on environment-specific values (paths, versions, settings), past decisions or rules, when a command fails and a known workaround may exist, and whenever a reusable fact is learned. Searches, reads and records pages in a Markdown wiki on a Git host through the wikictl CLI.
 allowed-tools: Bash
 ---
 
-# wikictl で wiki を参照・記録する
+# Read and record knowledge with wikictl
 
-wiki は Git ホスト上の Markdown リポジトリ。`wikictl` は常駐しない CLI で、`git` だけで読み書きする。
-すべてのコマンドは `${CLAUDE_PLUGIN_ROOT}/scripts/wikictl-logged.sh` 経由で呼ぶ（利用状況を記録するだけで、引数と出力は `wikictl` と同じ）。`--json` を付けて機械可読にする。
+The wiki is a Markdown repository on a Git host. `wikictl` is a CLI that reads and writes it using only git; it runs no server.
+Call every command through `${CLAUDE_PLUGIN_ROOT}/scripts/wikictl-logged.sh`: it records usage and otherwise behaves exactly like `wikictl`. Add `--json` for machine-readable output.
 
-## いつ使うか
+## When to use
 
-- 環境固有の値（パス、版数、設定）、過去の判断、規則を答える前
-- コマンドや手順が失敗したとき（既知の回避策を探す）
-- 新しいページを書く前（同じ問いのページが無いか）
-- 作業で再利用できる事実（失敗と回避策、環境固有の値、判断と理由、規約の変更）を得たとき
+- Before answering with environment-specific values (paths, versions, settings), past decisions, or rules
+- When a command or procedure fails (look for a known workaround)
+- Before writing a new page (is there already a page for the same question?)
+- When work yields a reusable fact: a failure and its workaround, an environment-specific value, a decision and its reason, a changed convention
 
-会話の要約、常時注入すべき指示（CLAUDE.md）、繰り返し実行する手順（Skills）は書かない。基準は「再取得コスト × 再利用確率」。
+Do not record conversation summaries, standing instructions (those belong in CLAUDE.md), or repeatable procedures (those belong in Skills). The test is "cost to obtain again × probability of reuse".
 
-## 参照
+## Reading
 
 ```bash
 W=${CLAUDE_PLUGIN_ROOT}/scripts/wikictl-logged.sh
-$W search --json <語>...          # AND。語は固有名詞・コマンド名・パス。--any で OR
-$W get --json <path>              # 本文・links・backlinks・sha。読むのは要るものだけ
-$W ls --json                      # 既定 dirs（global, projects/<現在>, machines/<このマシン>）の一覧
-$W context                        # 既定 dirs と設定の確認
+$W search --json <word>...        # all words must match; use proper nouns, command names, paths. --any for any word
+$W get --json <path>              # body, links, backlinks, sha. Read only what you need
+$W ls --json                      # pages in the default dirs: global, projects/<current>, machines/<this machine>
+$W context                        # the resolved dirs, machine and project names, and config
+$W help [<command>]               # exact flags and behaviour
 ```
 
-- 検索結果の `summary` で読む対象を選ぶ。`updated` が古い、または `links` に `contradicts` があれば値を疑い、両論併記する。
-- 既定の検索対象外を見るには `--dirs a,b`。`status: deprecated` を含めるには `--all`。
+- Pick what to read from `summary` in the search results. Doubt a value when `updated` is old or `links` contains `contradicts`; present both sides.
+- `--dirs a,b` searches outside the default dirs. `--all` includes pages with `status: deprecated`.
 
-## 記録
+## Recording
 
-1. `search` で同じ問いのページを探す。
-2. あれば `get --json` で `sha` と内容を取り、一時ファイルに書き出して編集し、`put --base <sha>` で全文を置換する。無ければ `put`（`--base` 無し）で新規作成。
+1. `search` for a page that answers the same question.
+2. If one exists, `get --json` it, write the content to a temporary file, edit it, and replace it with `put --base <sha>`. Otherwise create it with `put` (no `--base`).
 
 ```bash
-printf -- '---\nsummary: <問いへの答えを 1 文、100 字程度>\ntype: <concept|procedure|decision|policy|observation|event|index|source>\n---\n# <問い、または名詞句>\n\n<本文>\n\n## Links\n- part_of: [<題>](<相対パス>.md)\n- cites: <URL> | <何の根拠か>\n' | $W put --json <dir>/<slug>.md
+printf -- '---\nsummary: <the answer in one sentence, about 100 characters>\ntype: <concept|procedure|decision|policy|observation|event|index|source>\n---\n# <a question, or a noun phrase>\n\n<body>\n\n## Links\n- part_of: [<title>](<relative path>.md)\n- cites: <URL> | <what it supports>\n' | $W put --json <dir>/<slug>.md
 $W put --json --base <sha> <path> < edited.md
 ```
 
-- 終了コード 3 は衝突。出力の `content` と `sha` を読み直し、同じ変更を再適用して `--base <新しい sha>` で再度 `put`。
-- 終了コード 4 は形式違反（summary 欠落、フロントマターの YAML 不正、slug 違反）。直して再実行。
-- 置き場: 環境に依らない知識は `global/`、プロジェクト固有は `projects/<name>/`、マシン固有は `machines/<name>/`。迷えば狭い方。
-- slug は小文字英数字とハイフン。リンクは当該ファイルからの相対パスで `.md` を含める。関係は末尾の `## Links` 節に `- <type>: [題](path) | 注記`。
-- 未確定の結論は `summary: "仮: …"`。秘密は書かず参照名を書く。原典は URL（コミット固定の permalink）で引用する。
+- Exit code 3 is a conflict: read `content` and `sha` from the output, reapply the change, and `put` again with `--base <new sha>`. Writing to an existing page without `--base` is also a conflict.
+- Exit code 4 is a format violation (missing summary, invalid frontmatter YAML, bad slug). Fix and retry.
+- Placement: knowledge independent of any environment goes in `global/`, project-specific in `projects/<name>/`, machine-specific in `machines/<name>/`. When unsure, choose the narrower one.
+- Slugs are lowercase letters, digits and hyphens. Links are relative paths from the page itself and include `.md`. Relations go at the end in a `## Links` section as `- <type>: [title](path) | note`.
+- Mark tentative conclusions with `summary: "draft: ..."`. Never write secrets; write the name of the secret instead. Cite sources by URL (a commit-pinned permalink for code).
 
-## 移動・削除・検査
+## Moving, deleting, checking
 
 ```bash
-$W mv <path> <newpath>            # 参照元のリンクも 1 コミットで書き換える
-$W mv <dir>/ <newdir>/            # ディレクトリ単位
+$W mv <path> <newpath>            # rewrites links in referring pages in the same commit
+$W mv <dir>/ <newdir>/            # whole directory; both arguments end with /
 $W rm <path>
-$W lint --json                    # summary 欠落、Links 節文法、内部リンク切れ
+$W lint --json                    # missing summary, Links syntax, broken internal links
 ```

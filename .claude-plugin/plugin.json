@@ -1,8 +1,11 @@
 {
   "name": "wikictl",
   "displayName": "wikictl",
-  "description": "Git ホスト上の Markdown wiki を wikictl CLI で参照・記録するためのスキル",
+  "description": "Skill for reading and recording knowledge in a Markdown wiki on a Git host through the wikictl CLI",
   "version": "0.1.0",
-  "author": { "name": "roamer7038" },
-  "repository": "https://github.com/roamer7038/wikictl-claude-plugin"
+  "author": {
+    "name": "roamer7038"
+  },
+  "repository": "https://github.com/roamer7038/wikictl-claude-plugin",
+  "license": "MIT"
 }

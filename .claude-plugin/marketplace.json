@@ -7,8 +7,8 @@
     {
       "name": "wikictl",
       "source": "./",
-      "description": "wikictl CLI で wiki を参照・記録するスキル"
+      "description": "Skill for reading and recording knowledge in a Markdown wiki through the wikictl CLI"
     }
   ],
-  "description": "wikictl で wiki を参照・記録する Claude Code プラグイン"
+  "description": "Claude Code plugin for reading and recording knowledge with wikictl"
 }
