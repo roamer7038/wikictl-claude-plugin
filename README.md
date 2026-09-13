@@ -1,6 +1,6 @@
 # wikictl-claude-plugin
 
-Claude Code から [wikictl](https://github.com/roamer7038/wikictl-prototype) で wiki を参照・記録するためのプラグイン。中身はスキル `wikictl` と、利用状況を記録する薄いスクリプト。
+Claude Code から [wikictl](https://github.com/roamer7038/wikictl) で wiki を参照・記録するためのプラグイン。中身はスキル `wikictl` と、利用状況を記録する薄いスクリプト。
 
 前提: `wikictl` が PATH 上にあり、`~/.config/wikictl/config.yaml` が設定済みであること。
 

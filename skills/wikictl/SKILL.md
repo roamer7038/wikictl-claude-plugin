@@ -24,7 +24,7 @@ wiki は Git ホスト上の Markdown リポジトリ。`wikictl` は常駐し�
 W=${CLAUDE_PLUGIN_ROOT}/scripts/wikictl-logged.sh
 $W search --json <語>...          # AND。語は固有名詞・コマンド名・パス。--any で OR
 $W get --json <path>              # 本文・links・backlinks・sha。読むのは要るものだけ
-$W ls --json                      # 既定 dirs（shared, projects/<現在>, machines/<このマシン>）の一覧
+$W ls --json                      # 既定 dirs（global, projects/<現在>, machines/<このマシン>）の一覧
 $W context                        # 既定 dirs と設定の確認
 ```
 
@@ -43,7 +43,7 @@ $W put --json --base <sha> <path> < edited.md
 
 - 終了コード 3 は衝突。出力の `content` と `sha` を読み直し、同じ変更を再適用して `--base <新しい sha>` で再度 `put`。
 - 終了コード 4 は形式違反（summary 欠落、slug 違反）。直して再実行。
-- 置き場: 環境に依らない知識は `shared/`、プロジェクト固有は `projects/<name>/`、マシン固有は `machines/<name>/`。迷えば狭い方。
+- 置き場: 環境に依らない知識は `global/`、プロジェクト固有は `projects/<name>/`、マシン固有は `machines/<name>/`。迷えば狭い方。
 - slug は小文字英数字とハイフン。リンクは当該ファイルからの相対パスで `.md` を含める。関係は末尾の `## Links` 節に `- <type>: [題](path) | 注記`。
 - 未確定の結論は `summary: "仮: …"`。秘密は書かず参照名を書く。原典は URL（コミット固定の permalink）で引用する。
 
