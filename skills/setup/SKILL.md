@@ -88,4 +88,11 @@ wikictl context      # exit 0; profile, repo, author and search dirs with page c
 wikictl dirs         # directories of the whole wiki
 ```
 
+If `wikictl dirs` shows that the knowledge for the current project already lives under another `projects/<name>/` (for example, the project is a plugin or a fork of a tool whose pages are in `projects/<tool>/`), `projects/<current project>/` in the search dirs misses it. Propose mapping the project in the config, keyed by the last path segment of the `origin` remote without `.git`:
+
+```yaml
+projects:
+  wikictl-claude-plugin: wikictl
+```
+
 Report the config path, the selected profile and how it was selected, the repository, the author name and the search dirs. When profiles are used, also run `wikictl context` without `--profile` from a directory each profile should match and confirm `profile_source`. From here on the `wikictl` skill of this plugin handles reading and recording.

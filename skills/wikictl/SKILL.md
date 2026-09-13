@@ -27,7 +27,18 @@ wikictl context                   # selected profile, repository, search dirs an
 
 The search dirs are `global/`, `personal/`, `projects/<current project>/` and `machines/<this machine>/`. `--dirs a,b` searches others and `--dirs .` the whole wiki.
 
-Choose what to read from `summary` in the search results. An empty result means the wiki has nothing on it: find the answer elsewhere and consider recording it. If a page has an old `updated` or a `contradicts` link, say so instead of presenting the value as settled.
+Words match as case-insensitive substrings with no synonyms, stemming or relevance ranking:
+
+- Pass each term as its own argument. A quoted `"local LLM"` matches only that exact spacing.
+- Avoid one- or two-letter Latin words: `go` or `ai` also match inside longer words.
+- Results are ordered by last update and capped at 20 (`-n`). Choose what to read from `summary`, not from position; add a word when the list is long.
+
+An empty result, or results whose `summary` does not answer the question, does not yet mean the wiki lacks the answer. Retry in this order, stopping when a `summary` answers the question:
+
+1. Fewer words, a synonym, or the term in the other language of the wiki (`リランカー` / `reranker`).
+2. The same queries with `--dirs .`: knowledge about a tool or another project may live outside the current search dirs.
+
+Only when these also fail, find the answer elsewhere and consider recording it. If a page has an old `updated` or a `contradicts` link, say so instead of presenting the value as settled.
 
 ## Write
 

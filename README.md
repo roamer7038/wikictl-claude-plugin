@@ -55,6 +55,7 @@ flowchart TD
 Tells Claude when to consult the wiki and how to read and write pages:
 
 - Read before answering with environment-specific values, the user's conventions, past decisions or rules, when a command fails, and before writing a new page.
+- Search with one term per argument and choose pages by `summary`. When nothing answers the question, retry with a synonym or the other language and then with `--dirs .` before concluding that the wiki lacks it.
 - Write when work yields a reusable fact. Conversation summaries and procedures (skills) are not recorded; a rule that must hold in every conversation is suggested for CLAUDE.md instead.
 - Update an existing page with `put --base <sha>`; on exit code 3 re-read the page and reapply the change.
 - Place pages in the narrowest of `projects/<name>/`, `machines/<name>/`, `personal/` and `global/`. Before creating a directory, check `wikictl dirs`; give each directory an `index.md` and link its pages to it with `part_of`.
@@ -63,7 +64,7 @@ Format details are delegated to `wikictl help` and the wikictl README; the skill
 
 ### setup
 
-Walks through installation in order, skipping steps whose check already passes: the binary (`install.sh` from the wikictl releases, also to update an older version), the config file (repository URL and an author such as `claude-code@<hostname>`, or a new profile when another wiki is already configured), the remote repository (`gh repo create` when available), `wikictl init`, and a final `wikictl context` and `wikictl dirs`. Each step that installs, writes or pushes is confirmed with the user. Pass the repository URL as an argument to skip the question: `/wikictl:setup git@github.com:you/wiki.git`.
+Walks through installation in order, skipping steps whose check already passes: the binary (`install.sh` from the wikictl releases, also to update an older version), the config file (repository URL and an author such as `claude-code@<hostname>`, or a new profile when another wiki is already configured), the remote repository (`gh repo create` when available), `wikictl init`, and a final `wikictl context` and `wikictl dirs`, proposing a `projects` mapping when the current project's pages live under a different directory. Each step that installs, writes or pushes is confirmed with the user. Pass the repository URL as an argument to skip the question: `/wikictl:setup git@github.com:you/wiki.git`.
 
 ## License
 

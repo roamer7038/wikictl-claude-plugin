@@ -55,6 +55,7 @@ flowchart TD
 いつ wiki を見るか、どう読み書きするかを Claude に伝えます。
 
 - 環境固有の値、利用者の規約、過去の判断や規則を答える前、コマンドが失敗したとき、新しいページを書く前に読む。
+- 検索は 1 語ずつ引数に分けて渡し、`summary` で読むページを選ぶ。答えが見つからなければ、同義語や別の言語、次に `--dirs .` で再検索してから wiki に無いと判断する。
 - 作業で再利用できる事実が得られたら書く。会話の要約と手順（スキル）は書かない。毎回の会話で守る規則は、wiki ではなく CLAUDE.md への追加を提案する。
 - 既存ページは `put --base <sha>` で更新し、終了コード 3 なら読み直して変更を再適用する。
 - 置き場所は `projects/<name>/`、`machines/<name>/`、`personal/`、`global/` のうち最も狭いもの。ディレクトリを作る前に `wikictl dirs` を見て、各ディレクトリに `index.md` を置き、ページから `part_of` で結ぶ。
@@ -63,7 +64,7 @@ flowchart TD
 
 ### setup
 
-導入を順に進め、確認が通る段階は飛ばします。バイナリ（wikictl のリリースから `install.sh`。古い版の更新にも使う）、設定ファイル（リポジトリ URL と `claude-code@<hostname>` のような author。別の wiki が設定済みならプロファイルを追加）、リモートリポジトリ（`gh` があれば `gh repo create`）、`wikictl init`、最後に `wikictl context` と `wikictl dirs`。インストール・書き込み・push を伴う段階は毎回利用者に確認します。引数にリポジトリ URL を渡すと質問を省けます: `/wikictl:setup git@github.com:you/wiki.git`。
+導入を順に進め、確認が通る段階は飛ばします。バイナリ（wikictl のリリースから `install.sh`。古い版の更新にも使う）、設定ファイル（リポジトリ URL と `claude-code@<hostname>` のような author。別の wiki が設定済みならプロファイルを追加）、リモートリポジトリ（`gh` があれば `gh repo create`）、`wikictl init`、最後に `wikictl context` と `wikictl dirs`（現在のプロジェクトのページが別名のディレクトリにあれば `projects` の写像を提案）。インストール・書き込み・push を伴う段階は毎回利用者に確認します。引数にリポジトリ URL を渡すと質問を省けます: `/wikictl:setup git@github.com:you/wiki.git`。
 
 ## ライセンス
 
