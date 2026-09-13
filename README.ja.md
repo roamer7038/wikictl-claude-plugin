@@ -2,39 +2,65 @@
 
 [English](README.md)
 
-Claude Code から [wikictl](https://github.com/roamer7038/wikictl) で Markdown wiki を参照・記録するためのプラグイン。中身はスキル `wikictl` と、利用状況を記録する薄いスクリプトです。
-
-## 前提
-
-- `wikictl` が `PATH` 上にあること。導入は
-  `curl -fsSL https://raw.githubusercontent.com/roamer7038/wikictl/main/install.sh | sh`
-  または `go install github.com/roamer7038/wikictl/cmd/wikictl@latest`。
-- `~/.config/wikictl/config.yaml` に wiki リポジトリを設定し、そこへの `git push` が対話なしで通り、`wikictl init` で初期化済みであること。手順は wikictl の README にあります。
-- wikictl v0.1.0 で確認しています。
+Claude Code から [wikictl](https://github.com/roamer7038/wikictl) で Markdown wiki を参照・記録するためのプラグイン。中身はスキル 2 つだけで、フック・MCP・スクリプトはありません。
 
 ## 導入
 
-マーケットプレイスから（Claude Code 内で）:
+Claude Code 内で:
 
     /plugin marketplace add roamer7038/wikictl-claude-plugin
     /plugin install wikictl@wikictl-claude-plugin
 
-開発中（ローカル）:
+その後 `/wikictl:setup` を一度実行します。開発中は `claude --plugin-dir /path/to/wikictl-claude-plugin`。
 
-    claude --plugin-dir /path/to/wikictl-claude-plugin
+wikictl v0.1.0 で確認しています。
 
-## スキルの内容
+## 構成
 
-いつ wiki を見るべきか（環境固有の値、過去の判断、コマンドの失敗、新規ページを書く前）と、`wikictl` でページを検索・取得・記録する手順、書込みの衝突の解き方を Claude に伝えます。すべての呼出しは `scripts/wikictl-logged.sh` を経由します。
+```
+.claude-plugin/
+  plugin.json          プラグインのマニフェスト
+  marketplace.json     マーケットプレイスのマニフェスト（このリポジトリ自身がマーケットプレイス）
+skills/
+  wikictl/SKILL.md     ページの参照と記録。Claude が自分の判断で使う
+  setup/SKILL.md       wikictl の導入、設定、wiki の作成。/wikictl:setup で実行
+```
 
-## 利用記録
+## フロー
 
-スクリプトは 1 回の呼出しごとに `${XDG_DATA_HOME:-~/.local/share}/wikictl/usage.log` へ「日時、サブコマンド、終了コード」を 1 行追記します。wiki が実際に参照・記録されているかを時系列で見るためのもので、wikictl 本体は何も記録しません。ログはローテーションしないので、不要になったら削除してください。
+```mermaid
+flowchart TD
+    subgraph setup["/wikictl:setup"]
+        S1[wikictl version] -->|無い| S1a[install.sh]
+        S1 --> S2[config.yaml] -->|無い| S2a[repo URL と author を確認して書き出す]
+        S2 --> S3[リモートリポジトリ] -->|無い| S3a[gh repo create か利用者が作成]
+        S3 --> S4[wikictl init] --> S5[wikictl context]
+    end
+    subgraph use["wikictl スキル（通常の作業中）"]
+        U1[質問・失敗・新しい事実] --> U2[wikictl search --json]
+        U2 --> U3[wikictl get --json]
+        U3 --> U4[回答、または wikictl put --json]
+        U4 -->|exit 3| U3
+        U4 -->|exit 2| setup
+    end
+```
 
-## 範囲
+## スキル
 
-- CLAUDE.md は触りません。スキルの説明文が入口です。
-- フック（SessionStart の一覧注入、Stop の促し）と MCP は入れていません。利用状況を見て必要なら同じプラグインに足します。
+### wikictl
+
+いつ wiki を見るか、どう読み書きするかを Claude に伝えます。
+
+- 環境固有の値、過去の判断や規則を答える前、コマンドが失敗したとき、新しいページを書く前に読む。
+- 作業で再利用できる事実が得られたら書く。会話の要約、常時守る指示（CLAUDE.md）、手順（スキル）は書かない。
+- 既存ページは `put --base <sha>` で更新し、終了コード 3 なら読み直して変更を再適用する。
+- 置き場所は `global/`、`projects/<name>/`、`machines/<name>/` のうち狭い方。
+
+書式の細則は `wikictl help` と wikictl の README に委ね、スキルには判断に必要なことだけを書いています。
+
+### setup
+
+導入を順に進め、確認が通る段階は飛ばします。バイナリ（wikictl のリリースから `install.sh`）、`~/.config/wikictl/config.yaml`（リポジトリ URL と `claude-code@<hostname>` のような author）、リモートリポジトリ（`gh` があれば `gh repo create`）、`wikictl init`、最後に `wikictl context`。インストール・書き込み・push を伴う段階は毎回利用者に確認します。引数にリポジトリ URL を渡すと質問を省けます: `/wikictl:setup git@github.com:you/wiki.git`。
 
 ## ライセンス
 
