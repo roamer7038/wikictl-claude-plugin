@@ -1,6 +1,6 @@
 ---
 name: wikictl
-description: Use when an answer depends on environment-specific values (paths, versions, settings), past decisions or rules, when a command fails and a known workaround may exist, and whenever a reusable fact is learned. Searches, reads and records pages in a Markdown wiki on a Git host through the wikictl CLI.
+description: Use when (a) an answer depends on environment-specific values (paths, versions, settings), past decisions or rules, (b) a command fails and a known workaround may exist, or (c) a reusable fact is learned. Searches, reads and records pages in a Markdown wiki on a Git host through the wikictl CLI.
 allowed-tools: Bash
 ---
 
@@ -37,15 +37,18 @@ $W help [<command>]               # exact flags and behaviour
 1. `search` for a page that answers the same question.
 2. If one exists, `get --json` it, write the content to a temporary file, edit it, and replace it with `put --base <sha>`. Otherwise create it with `put` (no `--base`).
 
+A page is frontmatter with a one-line `summary` (required) and optionally `type` (concept, procedure, decision, policy, observation, event, index, source), then a title, the body, and a `## Links` section at the end. Example of a new page under `machines/laptop/`:
+
 ```bash
-printf -- '---\nsummary: <the answer in one sentence, about 100 characters>\ntype: <concept|procedure|decision|policy|observation|event|index|source>\n---\n# <a question, or a noun phrase>\n\n<body>\n\n## Links\n- part_of: [<title>](<relative path>.md)\n- cites: <URL> | <what it supports>\n' | $W put --json <dir>/<slug>.md
+printf -- '---\nsummary: Go on this machine is 1.26.5, installed with goenv under ~/.anyenv\ntype: observation\n---\n# Which Go is installed on laptop?\n\nInstalled with goenv; `go version` prints go1.26.5.\n\n## Links\n- part_of: [laptop](index.md)\n- cites: https://go.dev/dl/ | release list\n' | $W put --json machines/laptop/go-version.md
 $W put --json --base <sha> <path> < edited.md
 ```
 
 - Exit code 3 is a conflict: read `content` and `sha` from the output, reapply the change, and `put` again with `--base <new sha>`. Writing to an existing page without `--base` is also a conflict.
 - Exit code 4 is a format violation (missing summary, invalid frontmatter YAML, bad slug). Fix and retry.
+- Exit code 2 means wikictl is not configured (no config file, or no author): tell the user instead of retrying. Exit code 5 is a git failure such as authentication: report the message.
 - Placement: knowledge independent of any environment goes in `global/`, project-specific in `projects/<name>/`, machine-specific in `machines/<name>/`. When unsure, choose the narrower one.
-- Slugs are lowercase letters, digits and hyphens. Links are relative paths from the page itself and include `.md`. Relations go at the end in a `## Links` section as `- <type>: [title](path) | note`.
+- Slugs (file and directory names) are lowercase letters, digits and hyphens, not starting with a hyphen. Links are relative paths from the page itself and include `.md`. Relations go at the end in a `## Links` section as `- <type>: [title](path) | note`. Link types are a convention of this wiki, not enforced by the tool: part_of, depends_on, supersedes, contradicts, see_also, cites.
 - Mark tentative conclusions with `summary: "draft: ..."`. Never write secrets; write the name of the secret instead. Cite sources by URL (a commit-pinned permalink for code).
 
 ## Moving, deleting, checking
@@ -53,6 +56,6 @@ $W put --json --base <sha> <path> < edited.md
 ```bash
 $W mv <path> <newpath>            # rewrites links in referring pages in the same commit
 $W mv <dir>/ <newdir>/            # whole directory; both arguments end with /
-$W rm <path>
-$W lint --json                    # missing summary, Links syntax, broken internal links
+$W rm <path>                      # referring pages are left alone; run lint afterwards
+$W lint --json                    # missing summary, bad slug, invalid frontmatter, Links syntax, broken internal links
 ```

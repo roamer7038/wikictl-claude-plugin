@@ -1,6 +1,5 @@
 {
   "name": "wikictl",
-  "displayName": "wikictl",
   "description": "Skill for reading and recording knowledge in a Markdown wiki on a Git host through the wikictl CLI",
   "version": "0.1.0",
   "author": {

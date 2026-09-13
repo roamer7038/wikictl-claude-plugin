@@ -9,7 +9,8 @@ A Claude Code plugin for reading and recording knowledge in a Markdown wiki thro
 - `wikictl` on `PATH`. Install it with
   `curl -fsSL https://raw.githubusercontent.com/roamer7038/wikictl/main/install.sh | sh`
   or `go install github.com/roamer7038/wikictl/cmd/wikictl@latest`.
-- `~/.config/wikictl/config.yaml` pointing at your wiki repository (see the wikictl README).
+- `~/.config/wikictl/config.yaml` pointing at your wiki repository, with `git push` to it working without prompting, and the wiki initialised with `wikictl init`. The wikictl README has a quick start for this.
+- Verified with wikictl v0.1.0.
 
 ## Install
 
@@ -28,7 +29,7 @@ It tells Claude when to consult the wiki (environment-specific values, past deci
 
 ## Usage log
 
-The script appends one line per call to `${XDG_DATA_HOME:-~/.local/share}/wikictl/usage.log`: timestamp, subcommand, exit code. It exists to see whether the wiki is actually consulted and written to over time. wikictl itself records nothing.
+The script appends one line per call to `${XDG_DATA_HOME:-~/.local/share}/wikictl/usage.log`: timestamp, subcommand, exit code. It exists to see whether the wiki is actually consulted and written to over time. wikictl itself records nothing. The log is never rotated; delete it when it is no longer needed.
 
 ## Scope
 

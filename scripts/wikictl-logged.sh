@@ -2,7 +2,7 @@
 # Run wikictl and append one line of usage to the log (to measure whether the wiki is consulted).
 # Log format: timestamp TAB subcommand TAB exit code
 set -u
-log_dir="${XDG_DATA_HOME:-$HOME/.local/share}/wikictl"
+log_dir="${XDG_DATA_HOME:-${HOME:-/tmp}/.local/share}/wikictl"
 mkdir -p "$log_dir"
 # The subcommand is the first argument that is neither a flag nor the value of --config / --dirs.
 sub=""
