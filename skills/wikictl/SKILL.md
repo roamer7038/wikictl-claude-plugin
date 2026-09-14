@@ -6,7 +6,7 @@ allowed-tools: Bash
 
 # wikictl
 
-The wiki is a Markdown repository on a Git host; `wikictl` (v0.2.0 or later) reads and writes it with git alone. Run it directly and add `--json` for machine-readable output. `wikictl help <command>` describes any command.
+The wiki is a Markdown repository on a Git host; `wikictl` (v0.3.0 or later) reads and writes it with git alone. Run it directly and add `--json` for machine-readable output. Global flags (`--json`, `--dirs`, `--no-fetch`) go anywhere; command flags (`--base`, `-n`, `-m`) must come before the arguments, since a flag after an argument is taken as an argument. `wikictl help <command>` describes any command.
 
 ## When
 
@@ -83,9 +83,10 @@ Never write secrets; write the secret's name instead. Cite sources by URL.
 
 | Code | Meaning | Action |
 |---|---|---|
-| 2 | not configured, or a configuration error such as an unknown key or profile | Show the message; run `/wikictl:setup` when no config exists |
-| 3 | conflict: the page changed, or `--base` is missing | Read `content` and `sha` from the output; if `content` lacks the change, reapply it and `put` again with `--base <sha>`; if it already has the change, stop |
-| 4 | `put` or `mv`: invalid frontmatter or a bad path (rules in `wikictl help lint`); `lint`: any finding | Fix and retry |
-| 5 | git failure | Report the message; do not retry blindly |
+| 1 | error, such as a page that does not exist | Show the message |
+| 2 | usage error, not configured, or a configuration error such as an unknown key or profile | Show the message; run `/wikictl:setup` when no config exists |
+| 3 | conflict; `reason` in the output says which | `exists` from `put`: the page exists, so `get` it and update with `--base`, or choose another path. `changed` from `put`: if `content` lacks the change, reapply it and `put` again with `--base <sha>`; if it already has it, stop. Empty `sha` and `content`: the page was deleted since it was read; ask before recreating it. From `mv` or `rm`: nothing was written; re-read the page and run the command again |
+| 4 | `put`, `mv` or `rm`: invalid frontmatter, a page over the size limits, or a bad path (rules in `wikictl help lint`); `lint`: any finding | Fix and retry |
+| 5 | git failure while reading or writing; no partial result is printed | Report the message; do not retry blindly, and do not treat a failed `search` as an empty result |
 
 `mv` moves a page or a directory and rewrites links to it; `rm` deletes a page; `lint` reports format findings.

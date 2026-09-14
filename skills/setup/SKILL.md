@@ -12,7 +12,7 @@ Work through the steps in order and skip any step whose check already passes. Sh
 
 ## 1. Binary
 
-Check: `wikictl version` prints v0.2.0 or later.
+Check: `wikictl version` prints v0.3.0 or later.
 
 If it is missing or older, install the latest release into `~/.local/bin` (Linux and macOS, needs `curl` and `git`):
 
@@ -21,6 +21,10 @@ curl -fsSL https://raw.githubusercontent.com/roamer7038/wikictl/main/install.sh 
 ```
 
 `WIKICTL_INSTALL_DIR` changes the directory, `WIKICTL_VERSION` pins a tag. If an older `wikictl` elsewhere on `PATH` still wins, point that out. If `~/.local/bin` is not on `PATH`, tell the user what to add to their shell profile. `go install github.com/roamer7038/wikictl/cmd/wikictl@latest` is the alternative when Go is available.
+
+`install.sh` checks the binary against `checksums.txt`. When the user wants to verify where a release binary was built and `gh` has the `attestation` command (older `gh` releases lack it), download it and run `gh attestation verify <file> -R roamer7038/wikictl`; releases before v0.3.0 have no attestation.
+
+After updating from a version before v0.3.0, the first command creates a new mirror under `~/.cache/wikictl/`, named after a hash of `repo`. The old mirror directories, named after `repo` with `/ : @ \` replaced by `_` (such as `https___github.com_you_wiki.git`), are no longer used: list them and offer to delete them.
 
 ## 2. Configuration
 
@@ -36,7 +40,7 @@ After writing or fixing the file, run the check again until it reaches step 3 or
 
 The file is `$WIKICTL_CONFIG` if that variable is set, otherwise `${XDG_CONFIG_HOME:-~/.config}/wikictl/config.yaml`. For a new file collect:
 
-- `repo`: URL of the wiki repository. Ask if not given as an argument. `git push` to it must work without prompting (SSH key or credential helper); the push in step 4 is the test.
+- `repo`: URL of the wiki repository. Ask if not given as an argument. `git push` to it must work without prompting (SSH key or credential helper); the push in step 4 is the test. Never put a password or token in the URL (`https://user:token@...`): git saves it in the mirror as it is. If an existing `repo` has one (`context` shows it as `***@`), propose moving it to a credential helper or an SSH URL.
 - `author.name` / `author.email`: propose `claude-code@<host>` and `claude-code@<host>.invalid`, where `<host>` is the hostname up to the first `.`, so the agent's commits are distinguishable from the user's. Without `author`, wikictl uses `git config user.name` / `user.email`.
 
 ```yaml

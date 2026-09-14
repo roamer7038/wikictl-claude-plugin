@@ -13,7 +13,7 @@ Inside Claude Code:
 
 Then run `/wikictl:setup` once. For local development: `claude --plugin-dir /path/to/wikictl-claude-plugin`.
 
-Requires wikictl v0.2.0 or later; `/wikictl:setup` installs or updates it.
+Requires wikictl v0.3.0 or later; `/wikictl:setup` installs or updates it.
 
 ## Structure
 
