@@ -14,7 +14,7 @@ The wiki is a Markdown repository on a Git host; `wikictl` (v0.4.0 or later) rea
 - Read when a command or procedure fails: a workaround may be recorded.
 - Read before writing: a page for the same question may exist.
 - Write when work yields a reusable fact: a failure and its workaround, an environment-specific value, a decision and its reason.
-- Do not write conversation summaries or repeatable procedures (skills). A rule that must hold in every conversation without searching is a standing instruction: suggest adding it to CLAUDE.md instead. A user fact looked up only when relevant (which account to use, tool choices) goes in `personal/`.
+- Do not write conversation summaries or repeatable procedures (skills). A rule that must hold in every conversation without searching is a standing instruction: suggest adding it to CLAUDE.md instead. In a wiki used by one person, a user fact looked up only when relevant (which account to use, tool choices) goes in `personal/`.
 
 ## Choose the paths
 
@@ -27,6 +27,7 @@ wikictl never picks directories from the current directory: a command without pa
 ## Read
 
 ```bash
+set -o pipefail   # the pipeline exits with grep's code, not 0
 wikictl grep -il --all-match -e <word> -e <word> global personal projects/<name> machines/<name> \
   | xargs -r wikictl ls -lt       # matching files with type, last update and summary, newest first
 wikictl cat <path>...             # files as stored
@@ -37,12 +38,11 @@ wikictl find <path>... -meta type=decision   # also -name '*lease*', -type d, -m
 
 `grep` works like `grep -r`:
 
-- Patterns are case-sensitive basic regular expressions: add `-i`, and `-F` for a term with `.`, `*` or `[`.
+- Patterns are case-sensitive basic regular expressions: add `-i`, and `-F` for a term with `.`, `*` or `[`. `-i` ignores the case of letters other than ASCII (`École`) only together with `-F`.
 - Give each term its own `-e`; `--all-match` keeps the files that contain every term. A quoted `"local LLM"` matches only that exact spacing.
 - A term also matches inside longer words (`go` in `goenv`); add `-w` for short words.
-- Exit code 0: something matched; 1: nothing matched; 2: a path does not exist (the others are still searched).
 
-Choose what to read from `summary` in `ls -lt`, not from position; add a term when the list is long. `xargs -r` runs nothing when `grep` finds nothing.
+Choose what to read from `summary` in `ls -lt`, not from position; add a term when the list is long. `xargs -r` runs nothing when `grep` finds nothing. Read the exit code of the pipeline as `grep`'s (see Exit codes): without `pipefail` it is 0 even when `grep` failed.
 
 No match, or no `summary` that answers the question, does not yet mean the wiki lacks the answer. Retry in this order, stopping when a `summary` answers the question:
 
@@ -87,8 +87,8 @@ Choose the narrowest scope that fits:
 
 Before creating a directory, run `wikictl tree -d` and reuse an existing one when it fits.
 
-- Rename or move a page or directory with `wikictl mv -T <src> <dst>`; without `-T`, a `<dst>` that is an existing directory receives `<src>` inside it. `mv` rewrites `[text](path)` links, adds the old name to `aliases`, and never replaces an existing file.
-- Delete with `wikictl rm <path>...`, and a directory with `rm -r`. Links to deleted pages are left as they are; `lint` reports them as `broken_link`.
+- Rename or move a page or directory with `wikictl mv -T <src> <dst>`; without `-T`, a `<dst>` that is an existing directory receives `<src>` inside it. `mv` rewrites `[text](path)` links, adds the old name to `aliases`, and never replaces an existing file or directory (exit code 1, `not replacing`).
+- Delete with `wikictl rm <path>...`, and a directory with `rm -r` (without it, exit code 1). Links to deleted pages are left as they are; `lint` reports them as `broken_link`.
 
 Never write secrets; write the secret's name instead. Cite sources by URL.
 
@@ -96,8 +96,8 @@ Never write secrets; write the secret's name instead. Cite sources by URL.
 
 | Code | Meaning | Action |
 |---|---|---|
-| 1 | error, such as a path that does not exist, a `mv` destination that exists (`not replacing`) or `rm` of a directory without `-r`; from `grep`: nothing matched | Show the message; for `grep`, see Read |
-| 2 | usage error, not configured, or a configuration error such as an unknown profile; from `grep`: a path does not exist | Show the message; run `/wikictl:setup` when no config exists |
+| 1 | error, such as a path that does not exist or a refused `mv` or `rm` (see Placement); from `grep`: nothing matched | Show the message; for `grep`, retry as in Read |
+| 2 | usage error, not configured, or a configuration error such as an unknown profile; from `grep`: a path does not exist, while the other paths are still searched | Show the message; run `/wikictl:setup` when no config exists |
 | 3 | conflict; `reason` in the output says which | `exists` from `put`: the file exists, so `cat --json` it and update with `--base`, or choose another path. `changed`: if `content` lacks the change, reapply it and `put` again with `--base <sha>`; if it already has it, stop. Empty `sha` and `content`: the page was deleted since it was read; ask before recreating it. From `mv` or `rm`: nothing was written; re-read the page and run the command again |
 | 4 | `put`, `mv` or `rm`: invalid frontmatter, a page over the size limits, or a bad path such as a name with whitespace or a file at the wiki root (rules in `wikictl help lint`); `lint`: any finding | Fix and retry |
 | 5 | git failure while reading or writing; no partial result is printed | Report the message; do not retry blindly, and do not treat a failed `grep` as no match |

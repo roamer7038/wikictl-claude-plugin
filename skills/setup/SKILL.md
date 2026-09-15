@@ -36,7 +36,7 @@ Check: `wikictl context`.
 - Exit code 2 with another message (undefined profile, several matching profiles): fix what the message names.
 - Exit code 5: the config was read but the repository is not reachable; go to step 3.
 
-An unknown key only prints `wikictl: warning: config file <path>: unknown key "<key>" is ignored`. The keys `dirs`, `projects` and `machine` of versions before v0.4.0 are among them: offer to delete them.
+An unknown key only prints `wikictl: warning: config file <path>: unknown key "<key>" is ignored`. The keys `dirs`, `projects` and `machine` of versions before v0.4.0 are among them, also inside a profile (`unknown key "profiles.<name>.dirs"`): offer to delete them.
 
 After writing or fixing the file, run the check again until it reaches step 3 or 4.
 
