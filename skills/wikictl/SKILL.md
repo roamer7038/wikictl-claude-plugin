@@ -29,7 +29,7 @@ wikictl never picks directories from the current directory: a command without pa
 ```bash
 set -o pipefail   # the pipeline exits with grep's code, not 0
 wikictl grep -il --all-match -e <word> -e <word> global personal projects/<name> machines/<name> \
-  | xargs -r wikictl ls -lt       # matching files with type, last update and summary, newest first
+  | tr '\n' '\0' | xargs -0 -r wikictl ls -lt   # matching files with type, last update and summary, newest first
 wikictl cat <path>...             # files as stored
 wikictl stat <path>...            # sha, updated, title, summary, type, tags, status, aliases
 wikictl links <path>              # links in the page (out) and to it (in), with their type
@@ -42,7 +42,7 @@ wikictl find <path>... -meta type=decision   # also -name '*lease*', -type d, -m
 - Give each term its own `-e`; `--all-match` keeps the files that contain every term. A quoted `"local LLM"` matches only that exact spacing.
 - A term also matches inside longer words (`go` in `goenv`); add `-w` for short words.
 
-Choose what to read from `summary` in `ls -lt`, not from position; add a term when the list is long. `xargs -r` runs nothing when `grep` finds nothing. Read the exit code of the pipeline as `grep`'s (see Exit codes): without `pipefail` it is 0 even when `grep` failed.
+Choose what to read from `summary` in `ls -lt`, not from position; add a term when the list is long. `tr '\n' '\0' | xargs -0` passes names with quotes or spaces intact (a name with a newline is not supported), and `-r` runs nothing when `grep` finds nothing. Read the exit code of the pipeline as `grep`'s (see Exit codes): without `pipefail` it is 0 even when `grep` failed.
 
 No match, or no `summary` that answers the question, does not yet mean the wiki lacks the answer. Retry in this order, stopping when a `summary` answers the question:
 
