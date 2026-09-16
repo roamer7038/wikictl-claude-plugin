@@ -66,7 +66,7 @@ Format details are delegated to `wikictl help` and the wikictl README; the skill
 
 ### setup
 
-Walks through installation in order, skipping steps whose check already passes: the binary (`install.sh` from the wikictl releases, also to update an older version), the config file (repository URL and an author such as `claude-code@<hostname>`, or a new profile when another wiki is already configured; keys removed in wikictl v0.4.0 are offered for deletion), the remote repository (`gh repo create` when available), a first page written with `wikictl put` when the repository is empty, and a final `wikictl context` and `wikictl tree -d`. Each step that installs, writes or pushes is confirmed with the user. Pass the repository URL as an argument to skip the question: `/wikictl:setup git@github.com:you/wiki.git`.
+Walks through installation in order, skipping steps whose check already passes: the binary (`install.sh` from the wikictl releases, also to update an older version), the config file (repository URL and an author such as `claude-code@<hostname>`, or a new profile when another wiki is already configured), the remote repository (`gh repo create` when available), a first page written with `wikictl put` when the repository is empty, and a final `wikictl context` and `wikictl tree -d`. Each step that installs, writes or pushes is confirmed with the user. Pass the repository URL as an argument to skip the question: `/wikictl:setup git@github.com:you/wiki.git`.
 
 ## License
 
