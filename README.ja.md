@@ -66,7 +66,7 @@ flowchart TD
 
 ### setup
 
-導入を順に進め、確認が通る段階は飛ばします。バイナリ（wikictl のリリースから `install.sh`。古い版の更新にも使う）、設定ファイル（リポジトリ URL と `claude-code@<hostname>` のような author。別の wiki が設定済みならプロファイルを追加。wikictl v0.4.0 で削除されたキーは削除を提案）、リモートリポジトリ（`gh` があれば `gh repo create`）、空のリポジトリなら `wikictl put` で最初のページ、最後に `wikictl context` と `wikictl tree -d`。インストール・書き込み・push を伴う段階は毎回利用者に確認します。引数にリポジトリ URL を渡すと質問を省けます: `/wikictl:setup git@github.com:you/wiki.git`。
+導入を順に進め、確認が通る段階は飛ばします。バイナリ（wikictl のリリースから `install.sh`。古い版の更新にも使う）、設定ファイル（リポジトリ URL と `claude-code@<hostname>` のような author。別の wiki が設定済みならプロファイルを追加）、リモートリポジトリ（`gh` があれば `gh repo create`）、空のリポジトリなら `wikictl put` で最初のページ、最後に `wikictl context` と `wikictl tree -d`。インストール・書き込み・push を伴う段階は毎回利用者に確認します。引数にリポジトリ URL を渡すと質問を省けます: `/wikictl:setup git@github.com:you/wiki.git`。
 
 ## ライセンス
 
