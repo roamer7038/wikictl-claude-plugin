@@ -1,18 +1,18 @@
 ---
 name: setup
-description: Install or update the wikictl CLI, write its configuration or add a profile for another wiki, and create the initial pages of a wiki. Use when the user asks to set up wikictl or a wiki, or when a wikictl command exits with code 2 because no configuration exists.
+description: Install or update the wikictl CLI, write its configuration or add a profile for another wiki, and write the first page of a wiki. Use when the user asks to set up wikictl or a wiki, or when a wikictl command exits with code 2 because no configuration exists.
 allowed-tools: Bash
 ---
 
 # Set up wikictl
 
-Goal: `wikictl context` succeeds with the intended repository and the repository has its initial pages. Arguments, if given, are the wiki repository URL: `$ARGUMENTS`.
+Goal: `wikictl context` succeeds with the intended repository and wikictl can write to it. Arguments, if given, are the wiki repository URL: `$ARGUMENTS`.
 
 Work through the steps in order and skip any step whose check already passes. Show each command before running it; installing or updating a binary, writing the config file, creating a repository and pushing are all confirmed with the user first.
 
 ## 1. Binary
 
-Check: `wikictl version` prints v0.3.0 or later.
+Check: `wikictl version` prints v0.4.0 or later.
 
 If it is missing or older, install the latest release into `~/.local/bin` (Linux and macOS, needs `curl` and `git`):
 
@@ -33,8 +33,10 @@ Check: `wikictl context`.
 - Exit code 0 and `repo` is the intended repository: go to step 4.
 - Exit code 0 and `repo` is another wiki: add a profile as below.
 - Exit code 2 with a missing config file: write one as below.
-- Exit code 2 with another message (unknown key, undefined profile, several matching profiles): fix what the message names.
+- Exit code 2 with another message (undefined profile, several matching profiles): fix what the message names.
 - Exit code 5: the config was read but the repository is not reachable; go to step 3.
+
+An unknown key only prints `wikictl: warning: config file <path>: unknown key "<key>" is ignored`. The keys `dirs`, `projects` and `machine` of versions before v0.4.0 are among them, also inside a profile (`unknown key "profiles.<name>.dirs"`): offer to delete them.
 
 After writing or fixing the file, run the check again until it reaches step 3 or 4.
 
@@ -69,9 +71,7 @@ profiles:
 
 When a profile was added, run every `wikictl` command from the step 2 re-check to step 5 with `--profile <name>`: without it, the profile selected for the current directory is used, which may be the other wiki. The only exception is the final `profile_source` check in step 5.
 
-An unknown key is an error, so copy key names exactly. The other keys (`branch`, `machine`, `dirs`, `projects`) and the profile rules are in the [wikictl README](https://github.com/roamer7038/wikictl#configuration).
-
-If several people will share the wiki, mention that everyone searches the same `personal/`: either leave it unused or set `dirs`.
+Copy key names exactly: a misspelled key is ignored with a warning. The other key (`branch`) and the profile rules are in the [wikictl README](https://github.com/roamer7038/wikictl#configuration).
 
 ## 3. Repository
 
@@ -79,24 +79,23 @@ Check: `git ls-remote <repo>` succeeds.
 
 If the repository does not exist: on GitHub with `gh` logged in, offer `gh repo create <owner>/<name> --private`, where `<owner>/<name>` are the last two path segments of the URL without `.git`; otherwise ask the user to create an empty repository on their Git host and continue when done. A private repository is the safe default for a knowledge base.
 
-## 4. Initial pages
+## 4. First page
 
 Check: `git ls-remote --heads <repo>` prints a branch.
 
-If it prints nothing, run `wikictl init`. It commits `README.md` and `global/index.md` and pushes them. `init` exits with code 1 when the branch already exists; that means nothing needs to be done only if `wikictl context` shows the intended `repo`.
+If it prints nothing, the repository is empty; there is no separate initialization command. Offer to write a first page with `put`, which creates the branch and pushes it, and ask the user for its content, such as a fact about this machine under `machines/<host>/`:
+
+```bash
+wikictl put --json machines/<host>/<name>.md < page.md
+```
+
+Write the page as the `wikictl` skill of this plugin describes. A file at the wiki root, such as `README.md`, is rejected with exit code 4.
 
 ## 5. Verify
 
 ```bash
-wikictl context      # exit 0; profile, repo, author and search dirs with page counts
-wikictl dirs         # directories of the whole wiki
+wikictl context      # exit 0; config, profile, profile_source, repo, mirror, branch, author, remote
+wikictl tree -d -L 2 # directories of the wiki
 ```
 
-If `wikictl dirs` shows that the knowledge for the current project already lives under another `projects/<name>/` (for example, the project is a plugin or a fork of a tool whose pages are in `projects/<tool>/`), `projects/<current project>/` in the search dirs misses it. Propose mapping the project in the config, keyed by the last path segment of the `origin` remote without `.git`:
-
-```yaml
-projects:
-  wikictl-claude-plugin: wikictl
-```
-
-Report the config path, the selected profile and how it was selected, the repository, the author name and the search dirs. When profiles are used, also run `wikictl context` without `--profile` from a directory each profile should match and confirm `profile_source`. From here on the `wikictl` skill of this plugin handles reading and recording.
+Report the config path, the selected profile and how it was selected, the repository, the author name and the top-level directories. When profiles are used, also run `wikictl context` without `--profile` from a directory each profile should match and confirm `profile_source`. From here on the `wikictl` skill of this plugin handles reading and recording.
