@@ -55,7 +55,7 @@ Only when these also fail, find the answer elsewhere and consider recording it. 
 
 1. `grep` for a page answering the same question.
 2. New page: `wikictl put --json <path> < page.md`. Missing directories are created. Without `--json` or `-v`, `put` prints nothing on success.
-3. Existing page: `wikictl cat --json <path>` prints `content` and `sha`. Write `content` to a temporary file, edit it, then `wikictl put --json --base <sha> <path> < page.md`. The `sha` printed by `put --json` is valid for the next `--base`.
+3. Existing page: `wikictl cat --json <path>` prints `content` and `sha`. Write `content` to a temporary file, edit it, then `wikictl put --json --base <sha> -m <reason> <path> < page.md`. The `sha` printed by `put --json` is valid for the next `--base`.
 
 A page is frontmatter, a title, the body, and, when it has links, a `## Links` section as the last heading; add body text above it, since lines after the links are reported as `links_syntax`. Always write a one-line `summary`: `ls -l` shows it. `type` is optional (concept, procedure, decision, policy, observation, event, index, source). Write links to pages as `[text](path)`, a path relative to the page: `mv` rewrites only that form. Name files and directories with lowercase letters, digits and hyphens.
 
@@ -73,6 +73,8 @@ type: observation
 ```
 
 `put` prints warnings (missing summary, broken link, Links syntax, name style) on standard error and still writes the page. Fix them; `wikictl lint <path>` checks again.
+
+Without `-m`, the commit message is `wikictl: <command> <arguments>`, which records what the command did but not why. When changing, moving or deleting a file that already exists, pass `-m <reason>` so that `git log` and the Git host show why the page changed, such as `-m "fix: the default branch is main, not master"`. A new page can keep the default message: the page itself says what it is.
 
 ## Placement
 

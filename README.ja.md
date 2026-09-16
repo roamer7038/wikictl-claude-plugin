@@ -59,7 +59,7 @@ flowchart TD
 - 環境固有の値、利用者の規約、過去の判断や規則を答える前、コマンドが失敗したとき、新しいページを書く前に読む。
 - wikictl はカレントディレクトリから対象のディレクトリを選ばない。そのため `wikictl tree -d` を見て、当てはまる `global`・`personal`・`projects/<name>`・`machines/<name>` を `grep -il --all-match -e <語> -e <語>` に渡し、`ls -lt` の `summary` で読むページを選ぶ。答えが見つからなければ、同義語や別の言語、次に wiki 全体で再検索してから wiki に無いと判断する。
 - 作業で再利用できる事実が得られたら書く。会話の要約と手順（スキル）は書かない。毎回の会話で守る規則は、wiki ではなく CLAUDE.md への追加を提案する。
-- 既存ページは `cat --json` の `content` と `sha` から `put --base <sha>` で更新し、終了コード 3 なら読み直して変更を再適用する。
+- 既存ページは `cat --json` の `content` と `sha` から `put --base <sha>` で更新し、終了コード 3 なら読み直して変更を再適用する。既にあるファイルの変更・移動・削除では `-m <理由>` を渡す。既定のコミットメッセージには、何をしたかだけで理由が残らない。
 - 置き場所は `projects/<name>/`、`machines/<name>/`、`personal/`、`global/` のうち最も狭いもの。ディレクトリを作る前に `wikictl tree -d` を見る。名前を変えるときは `mv -T` を使う。
 
 書式の細則は `wikictl help` と wikictl の README に委ね、スキルには判断に必要なことだけを書いています。
