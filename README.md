@@ -13,7 +13,7 @@ Inside Claude Code:
 
 Then run `/wikictl:setup` once. For local development: `claude --plugin-dir /path/to/wikictl-claude-plugin`.
 
-Requires wikictl v0.4.0 or later; `/wikictl:setup` installs or updates it.
+Requires wikictl v0.4.1 or later; `/wikictl:setup` installs or updates it.
 
 ## Structure
 
@@ -31,7 +31,7 @@ skills/
 ```mermaid
 flowchart TD
     subgraph setup["/wikictl:setup"]
-        S1[wikictl version] -->|missing or older than v0.4.0| S1a[install.sh]
+        S1[wikictl version] -->|missing or older than v0.4.1| S1a[install.sh]
         S1 --> S2[wikictl context] -->|no config| S2a[ask repo URL and author, write file]
         S2 -->|another wiki exists| S2b[add a profile]
         S2 --> S3[remote repository] -->|missing| S3a[gh repo create, or the user creates it]
@@ -60,13 +60,13 @@ Tells Claude when to consult the wiki and how to read and write pages:
 - wikictl does not choose directories from the current directory, so the skill has Claude look at `wikictl tree -d` and pass the matching `global`, `personal`, `projects/<name>` and `machines/<name>` to `grep -il --all-match -e <word> -e <word>`, then choose pages by `summary` from `ls -lt`. When nothing answers the question, it retries with a synonym or the other language and then over the whole wiki before concluding that the wiki lacks it.
 - Write when work yields a reusable fact. Conversation summaries and procedures (skills) are not recorded; a rule that must hold in every conversation is suggested for CLAUDE.md instead.
 - Update an existing page by passing the `content` and `sha` from `cat --json` to `put --base <sha>`; on exit code 3 re-read the page and reapply the change. Changing, moving or deleting a file that exists takes `-m <reason>`, since the default commit message records only what the command did.
-- Place pages in the narrowest of `projects/<name>/`, `machines/<name>/`, `personal/` and `global/`. Before creating a directory, check `wikictl tree -d`; rename with `mv -T`.
+- Place pages in the narrowest of `projects/<name>/`, `machines/<name>/`, `personal/` and `global/`. That layout is this plugin's convention: wikictl gives no meaning to directory names. Before creating a directory, check `wikictl tree -d`; rename with `mv -T`.
 
 Format details are delegated to `wikictl help` and the wikictl README; the skill repeats only what Claude needs to decide.
 
 ### setup
 
-Walks through installation in order, skipping steps whose check already passes: the binary (`install.sh` from the wikictl releases, also to update an older version), the config file (repository URL and an author such as `claude-code@<hostname>`, or a new profile when another wiki is already configured; keys removed in wikictl v0.4.0 are offered for deletion), the remote repository (`gh repo create` when available), a first page written with `wikictl put` when the repository is empty, and a final `wikictl context` and `wikictl tree -d`. Each step that installs, writes or pushes is confirmed with the user. Pass the repository URL as an argument to skip the question: `/wikictl:setup git@github.com:you/wiki.git`.
+Walks through installation in order, skipping steps whose check already passes: the binary (`install.sh` from the wikictl releases, also to update an older version), the config file (repository URL and an author such as `claude-code@<hostname>`, or a new profile when another wiki is already configured), the remote repository (`gh repo create` when available), a first page written with `wikictl put` when the repository is empty, and a final `wikictl context` and `wikictl tree -d`. Each step that installs, writes or pushes is confirmed with the user. Pass the repository URL as an argument to skip the question: `/wikictl:setup git@github.com:you/wiki.git`.
 
 ## License
 

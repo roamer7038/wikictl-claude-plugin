@@ -12,7 +12,7 @@ Work through the steps in order and skip any step whose check already passes. Sh
 
 ## 1. Binary
 
-Check: `wikictl version` prints v0.4.0 or later.
+Check: `wikictl version` prints v0.4.1 or later.
 
 If it is missing or older, install the latest release into `~/.local/bin` (Linux and macOS, needs `curl` and `git`):
 
@@ -22,9 +22,7 @@ curl -fsSL https://raw.githubusercontent.com/roamer7038/wikictl/main/install.sh 
 
 `WIKICTL_INSTALL_DIR` changes the directory, `WIKICTL_VERSION` pins a tag. If an older `wikictl` elsewhere on `PATH` still wins, point that out. If `~/.local/bin` is not on `PATH`, tell the user what to add to their shell profile. `go install github.com/roamer7038/wikictl/cmd/wikictl@latest` is the alternative when Go is available.
 
-`install.sh` checks the binary against `checksums.txt`. When the user wants to verify where a release binary was built and `gh` has the `attestation` command (older `gh` releases lack it), download it and run `gh attestation verify <file> -R roamer7038/wikictl`; releases before v0.3.0 have no attestation.
-
-After updating from a version before v0.3.0, the first command creates a new mirror under `~/.cache/wikictl/`, named after a hash of `repo`. The old mirror directories, named after `repo` with `/ : @ \` replaced by `_` (such as `https___github.com_you_wiki.git`), are no longer used: list them and offer to delete them.
+`install.sh` checks the binary against `checksums.txt`. When the user wants to verify where a release binary was built and `gh` has the `attestation` command (older `gh` releases lack it), download it and run `gh attestation verify <file> -R roamer7038/wikictl`.
 
 ## 2. Configuration
 
@@ -36,7 +34,7 @@ Check: `wikictl context`.
 - Exit code 2 with another message (undefined profile, several matching profiles): fix what the message names.
 - Exit code 5: the config was read but the repository is not reachable; go to step 3.
 
-An unknown key only prints `wikictl: warning: config file <path>: unknown key "<key>" is ignored`. The keys `dirs`, `projects` and `machine` of versions before v0.4.0 are among them, also inside a profile (`unknown key "profiles.<name>.dirs"`): offer to delete them.
+An unknown key only prints `wikictl: warning: config file <path>: unknown key "<key>" is ignored`.
 
 After writing or fixing the file, run the check again until it reaches step 3 or 4.
 

@@ -6,7 +6,7 @@ allowed-tools: Bash
 
 # wikictl
 
-The wiki is a Markdown repository on a Git host; `wikictl` (v0.4.0 or later) reads and writes it with git alone. Its commands behave like the Linux commands of the same name (`grep`, `cat`, `stat`, `ls`, `find`, `tree`, `mv`, `rm`), take paths from the wiki root, and accept flags before or after the arguments. Add `--json` for machine-readable output. `wikictl help <command>` describes any command.
+The wiki is a Markdown repository on a Git host; `wikictl` (v0.4.1 or later) reads and writes it with git alone. Its commands behave like the Linux commands of the same name (`grep`, `cat`, `stat`, `ls`, `find`, `tree`, `mv`, `rm`), take paths from the wiki root, and accept flags before or after the arguments. Add `--json` for machine-readable output. `wikictl help <command>` describes any command.
 
 ## When
 
@@ -78,7 +78,7 @@ Without `-m`, the commit message is `wikictl: <command> <arguments>`, which reco
 
 ## Placement
 
-Choose the narrowest scope that fits:
+wikictl gives no meaning to directory names; the layout below is this plugin's convention. Choose the narrowest scope that fits:
 
 | Directory | Knowledge valid |
 |---|---|
@@ -89,8 +89,8 @@ Choose the narrowest scope that fits:
 
 Before creating a directory, run `wikictl tree -d` and reuse an existing one when it fits.
 
-- Rename or move a page or directory with `wikictl mv -T <src> <dst>`; without `-T`, a `<dst>` that is an existing directory receives `<src>` inside it. `mv` rewrites `[text](path)` links, adds the old name to `aliases`, and never replaces an existing file or directory (exit code 1, `not replacing`).
-- Delete with `wikictl rm <path>...`, and a directory with `rm -r` (without it, exit code 1). Links to deleted pages are left as they are; `lint` reports them as `broken_link`.
+- Rename or move a page or directory with `wikictl mv -T <src> <dst>`; without `-T`, a `<dst>` that is an existing directory receives `<src>` inside it. `mv` rewrites `[text](path)` links, adds the old name to `aliases`, and never replaces an existing file or directory (exit code 1, `not replacing`). A `.md` file that is not a page, such as one under a directory whose name starts with a dot, moves with its content unchanged, and links to it are rewritten too.
+- Delete with `wikictl rm <path>...`, and a directory with `rm -r` (without it, exit code 1). `rm` does not apply the file name rules, so a file added by a person, such as one whose name holds a space, can be deleted. Links to deleted pages are left as they are; `lint` reports them as `broken_link`.
 
 Never write secrets; write the secret's name instead. Cite sources by URL.
 
@@ -101,7 +101,7 @@ Never write secrets; write the secret's name instead. Cite sources by URL.
 | 1 | error, such as a path that does not exist or a refused `mv` or `rm` (see Placement); from `grep`: nothing matched | Show the message; for `grep`, retry as in Read |
 | 2 | usage error, not configured, or a configuration error such as an unknown profile; from `grep`: a path does not exist, while the other paths are still searched | Show the message; run `/wikictl:setup` when no config exists |
 | 3 | conflict; `reason` in the output says which | `exists` from `put`: the file exists, so `cat --json` it and update with `--base`, or choose another path. `changed`: if `content` lacks the change, reapply it and `put` again with `--base <sha>`; if it already has it, stop. Empty `sha` and `content`: the page was deleted since it was read; ask before recreating it. From `mv` or `rm`: nothing was written; re-read the page and run the command again. `moved`: another push won the race, so nothing was written and there is no `content` or `sha`; run the same command again |
-| 4 | `put`, `mv` or `rm`: invalid frontmatter, a page over the size limits, or a bad path such as a name with whitespace or a file at the wiki root (rules in `wikictl help lint`); `lint`: any finding | Fix and retry |
+| 4 | `put`, `edit` or `mv`: invalid frontmatter, a page over the size limits, a bad path such as a name with whitespace or a file at the wiki root (rules in `wikictl help lint`), or a path git refuses to store, reported as `bad_path: <path>: git refuses the path` (a component such as `git~1`, which names `.git` on NTFS); `rm`: a file at the wiki root; `lint`: any finding | Fix and retry |
 | 5 | git failure while reading or writing, such as a push that retrying cannot fix (no permission, a stale lock file, a hook rejection); no partial result is printed | Report the message; do not retry blindly, and do not treat a failed `grep` as no match |
 
 Text output shows control characters as `\xNN`; `--json` has the stored value.
