@@ -12,7 +12,7 @@ Work through the steps in order and skip any step whose check already passes. Sh
 
 ## 1. Binary
 
-Check: `wikictl version` prints v0.4.0 or later.
+Check: `wikictl version` prints v0.4.1 or later.
 
 If it is missing or older, install the latest release into `~/.local/bin` (Linux and macOS, needs `curl` and `git`):
 
