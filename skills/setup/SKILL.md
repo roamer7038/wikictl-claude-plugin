@@ -12,7 +12,7 @@ Work through the steps in order and skip any step whose check already passes. Sh
 
 ## 1. Binary
 
-Check: `wikictl version` prints v0.4.1 or later.
+Check: `wikictl version` prints v0.5.0 or later.
 
 If it is missing or older, install the latest release into `~/.local/bin` (Linux and macOS, needs `curl` and `git`):
 
@@ -69,7 +69,7 @@ profiles:
 
 When a profile was added, run every `wikictl` command from the step 2 re-check to step 5 with `--profile <name>`: without it, the profile selected for the current directory is used, which may be the other wiki. The only exception is the final `profile_source` check in step 5.
 
-Copy key names exactly: a misspelled key is ignored with a warning. The other key (`branch`) and the profile rules are in the [wikictl README](https://github.com/roamer7038/wikictl#configuration).
+Copy key names exactly: a misspelled key is ignored with a warning. The other keys (`branch`, `fetch_ttl`, `lint.ignore`) and the profile rules are in the [wikictl README](https://github.com/roamer7038/wikictl#configuration). `fetch_ttl` (seconds) skips the fetch before a read for that long, which suits an agent reading the same wiki through a session; writes always fetch. `lint.ignore` keeps `name_style` and `missing_summary` out of `lint`, which an existing repository turned into a wiki reports for names such as `README.md`.
 
 ## 3. Repository
 
@@ -87,12 +87,12 @@ If it prints nothing, the repository is empty; there is no separate initializati
 wikictl put --json machines/<host>/<name>.md < page.md
 ```
 
-Write the page as the `wikictl` skill of this plugin describes. A file at the wiki root, such as `README.md`, is rejected with exit code 4.
+Write the page as the `wikictl` skill of this plugin describes. The wiki root holds pages like any directory; only the root itself as a path (`.`) is rejected.
 
 ## 5. Verify
 
 ```bash
-wikictl context      # exit 0; config, profile, profile_source, repo, mirror, branch, author, remote
+wikictl context      # exit 0; config, profile, profile_source, repo, fetch_ttl, fetched, mirror, branch, author, remote
 wikictl tree -d -L 2 # directories of the wiki
 ```
 

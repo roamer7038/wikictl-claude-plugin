@@ -13,7 +13,7 @@ Inside Claude Code:
 
 Then run `/wikictl:setup` once. For local development: `claude --plugin-dir /path/to/wikictl-claude-plugin`.
 
-Requires wikictl v0.4.1 or later; `/wikictl:setup` installs or updates it.
+Requires wikictl v0.5.0 or later; `/wikictl:setup` installs or updates it.
 
 ## Structure
 
@@ -31,7 +31,7 @@ skills/
 ```mermaid
 flowchart TD
     subgraph setup["/wikictl:setup"]
-        S1[wikictl version] -->|missing or older than v0.4.1| S1a[install.sh]
+        S1[wikictl version] -->|missing or older than v0.5.0| S1a[install.sh]
         S1 --> S2[wikictl context] -->|no config| S2a[ask repo URL and author, write file]
         S2 -->|another wiki exists| S2b[add a profile]
         S2 --> S3[remote repository] -->|missing| S3a[gh repo create, or the user creates it]

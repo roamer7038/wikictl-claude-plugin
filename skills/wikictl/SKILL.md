@@ -6,7 +6,7 @@ allowed-tools: Bash
 
 # wikictl
 
-The wiki is a Markdown repository on a Git host; `wikictl` (v0.4.1 or later) reads and writes it with git alone. Its commands behave like the Linux commands of the same name (`grep`, `cat`, `stat`, `ls`, `find`, `tree`, `mv`, `rm`), take paths from the wiki root, and accept flags before or after the arguments. Add `--json` for machine-readable output. `wikictl help <command>` describes any command.
+The wiki is a Markdown repository on a Git host; `wikictl` (v0.5.0 or later) reads and writes it with git alone. Its commands behave like the Linux commands of the same name (`grep`, `cat`, `stat`, `ls`, `find`, `tree`, `mv`, `rm`), take paths from the wiki root, and accept flags before or after the arguments. Add `--json` for machine-readable output. `wikictl help <command>` describes any command.
 
 ## When
 
@@ -32,8 +32,11 @@ wikictl grep -il --all-match -e <word> -e <word> global personal projects/<name>
   | tr '\n' '\0' | xargs -0 -r wikictl ls -lt   # matching files with type, last update and summary, newest first
 wikictl cat <path>...             # files as stored
 wikictl stat <path>...            # sha, updated, title, summary, type, tags, status, aliases
-wikictl links <path>              # links in the page (out) and to it (in), with their type
+wikictl links <path>...           # links in the pages (out) and to them (in), with their type
 wikictl find <path>... -meta type=decision   # also -name '*lease*', -type d, -mtime -7
+wikictl find --frontmatter=summary,type <path>...   # the frontmatter of many files at once
+wikictl log <path>...             # the commits that changed the files, newest first
+wikictl cat --at <commit> <path>...   # the files as of that commit; that sha is not a --base
 ```
 
 `grep` works like `grep -r`:
@@ -49,13 +52,13 @@ No match, or no `summary` that answers the question, does not yet mean the wiki 
 1. Fewer words, a synonym, or the term in the other language of the wiki (`リランカー` / `reranker`).
 2. The same queries without paths: knowledge about a tool or another project may live elsewhere in the wiki.
 
-Only when these also fail, find the answer elsewhere and consider recording it. If `stat` shows an old `updated` or `links` shows a `contradicts` link, say so instead of presenting the value as settled.
+Only when these also fail, find the answer elsewhere and consider recording it. If `stat` shows an old `updated` or `links` shows a `contradicts` link, say so instead of presenting the value as settled. `log` shows what changed the page and when, and `cat --at <commit>` reads the version before a change.
 
 ## Write
 
 1. `grep` for a page answering the same question.
 2. New page: `wikictl put --json <path> < page.md`. Missing directories are created. Without `--json` or `-v`, `put` prints nothing on success.
-3. Existing page: `wikictl cat --json <path>` prints `content` and `sha`. Write `content` to a temporary file, edit it, then `wikictl put --json --base <sha> <path> < page.md`. The `sha` printed by `put --json` is valid for the next `--base`.
+3. Existing page: `wikictl cat --json <path>` prints `content` and `sha`, or `content_base64` instead of `content` when the file is not valid UTF-8, which is decoded before editing. Write `content` to a temporary file, edit it, then `wikictl put --json --base <sha> <path> < page.md`. The `sha` printed by `put --json` is valid for the next `--base`.
 
 A page is frontmatter, a title, the body, and, when it has links, a `## Links` section as the last heading; add body text above it, since lines after the links are reported as `links_syntax`. Always write a one-line `summary`: `ls -l` shows it. `type` is optional (concept, procedure, decision, policy, observation, event, index, source). Write links to pages as `[text](path)`, a path relative to the page: `mv` rewrites only that form. Name files and directories with lowercase letters, digits and hyphens.
 
@@ -99,7 +102,7 @@ Never write secrets; write the secret's name instead. Cite sources by URL.
 | 1 | error, such as a path that does not exist or a refused `mv` or `rm` (see Placement); from `grep`: nothing matched | Show the message; for `grep`, retry as in Read |
 | 2 | usage error, not configured, or a configuration error such as an unknown profile; from `grep`: a path does not exist, while the other paths are still searched | Show the message; run `/wikictl:setup` when no config exists |
 | 3 | conflict; `reason` in the output says which | `exists` from `put`: the file exists, so `cat --json` it and update with `--base`, or choose another path. `changed`: if `content` lacks the change, reapply it and `put` again with `--base <sha>`; if it already has it, stop. Empty `sha` and `content`: the page was deleted since it was read; ask before recreating it. From `mv` or `rm`: nothing was written; re-read the page and run the command again. `moved`: another push won the race, so nothing was written and there is no `content` or `sha`; run the same command again |
-| 4 | `put`, `edit` or `mv`: invalid frontmatter, a page over the size limits, a bad path such as a name with whitespace or a file at the wiki root (rules in `wikictl help lint`), or a path git refuses to store, reported as `bad_path: <path>: git refuses the path` (a component such as `git~1`, which names `.git` on NTFS); `rm`: a file at the wiki root; `lint`: any finding | Fix and retry |
+| 4 | `put`, `edit` or `mv`: invalid frontmatter, a page over the size limits, a bad path such as a name with whitespace (rules in `wikictl help lint`), or a path git refuses to store, reported as `bad_path: <path>: git refuses the path` (a component such as `git~1`, which names `.git` on NTFS); `mv` or `rm`: the wiki root itself (`.`), while a file at the wiki root is treated like one in a directory; `lint`: any finding | Fix and retry |
 | 5 | git failure while reading or writing, such as a push that retrying cannot fix (no permission, a stale lock file, a hook rejection); no partial result is printed | Report the message; do not retry blindly, and do not treat a failed `grep` as no match |
 
 Text output shows control characters as `\xNN`; `--json` has the stored value.

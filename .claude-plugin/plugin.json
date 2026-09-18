@@ -1,7 +1,7 @@
 {
   "name": "wikictl",
   "description": "Skills for reading and recording knowledge in a Markdown wiki with the wikictl CLI, and for setting wikictl up",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "author": {
     "name": "roamer7038"
   },
