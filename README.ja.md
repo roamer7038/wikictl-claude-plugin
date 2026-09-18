@@ -13,7 +13,7 @@ Claude Code 内で:
 
 その後 `/wikictl:setup` を一度実行します。開発中は `claude --plugin-dir /path/to/wikictl-claude-plugin`。
 
-wikictl v0.4.1 以降が必要です。`/wikictl:setup` で導入・更新できます。
+wikictl v0.5.0 以降が必要です。`/wikictl:setup` で導入・更新できます。
 
 ## 構成
 
@@ -31,7 +31,7 @@ skills/
 ```mermaid
 flowchart TD
     subgraph setup["/wikictl:setup"]
-        S1[wikictl version] -->|無い、または v0.4.1 未満| S1a[install.sh]
+        S1[wikictl version] -->|無い、または v0.5.0 未満| S1a[install.sh]
         S1 --> S2[wikictl context] -->|設定が無い| S2a[repo URL と author を確認して書き出す]
         S2 -->|別の wiki が設定済み| S2b[プロファイルを追加]
         S2 --> S3[リモートリポジトリ] -->|無い| S3a[gh repo create か利用者が作成]
