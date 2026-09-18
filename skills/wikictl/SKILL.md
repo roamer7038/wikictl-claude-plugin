@@ -36,7 +36,7 @@ wikictl links <path>...           # links in the pages (out) and to them (in), w
 wikictl find <path>... -meta type=decision   # also -name '*lease*', -type d, -mtime -7
 wikictl find --frontmatter=summary,type <path>...   # the frontmatter of many files at once
 wikictl log <path>...             # the commits that changed the files, newest first
-wikictl cat --at <commit> <path>...   # the files as of that commit
+wikictl cat --at <commit> <path>...   # the files as of that commit; that sha is not a --base
 ```
 
 `grep` works like `grep -r`:
@@ -58,7 +58,7 @@ Only when these also fail, find the answer elsewhere and consider recording it. 
 
 1. `grep` for a page answering the same question.
 2. New page: `wikictl put --json <path> < page.md`. Missing directories are created. Without `--json` or `-v`, `put` prints nothing on success.
-3. Existing page: `wikictl cat --json <path>` prints `content` and `sha`. Write `content` to a temporary file, edit it, then `wikictl put --json --base <sha> <path> < page.md`. The `sha` printed by `put --json` is valid for the next `--base`.
+3. Existing page: `wikictl cat --json <path>` prints `content` and `sha`, or `content_base64` instead of `content` when the file is not valid UTF-8, which is decoded before editing. Write `content` to a temporary file, edit it, then `wikictl put --json --base <sha> <path> < page.md`. The `sha` printed by `put --json` is valid for the next `--base`.
 
 A page is frontmatter, a title, the body, and, when it has links, a `## Links` section as the last heading; add body text above it, since lines after the links are reported as `links_syntax`. Always write a one-line `summary`: `ls -l` shows it. `type` is optional (concept, procedure, decision, policy, observation, event, index, source). Write links to pages as `[text](path)`, a path relative to the page: `mv` rewrites only that form. Name files and directories with lowercase letters, digits and hyphens.
 
